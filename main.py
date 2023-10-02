@@ -1,10 +1,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import UserMixin, LoginManager
 
 DB_NAME = 'database.db'
 db = SQLAlchemy()
 
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(128), unique=True)
+    user_name = db.Column(db.String(128))
+    password = db.Column(db.String(128))
+    
 def create_app():
     #Configure and Initiate App (private key, public key, secret key, database uri)
     app = Flask(__name__, instance_relative_config=True)
@@ -15,23 +21,21 @@ def create_app():
     db.init_app(app)
     
     #Register Blueprints
-    import views
-    import auth
+    import views.views as views
+    import views.auth as auth
     
     app.register_blueprint(views.views, url_prefix='/')
     app.register_blueprint(auth.auth, url_prefix='/')
     
     #create Database
+    from main import User
     with app.app_context():
         db.create_all()
-
-    #Manage Login
-
-    #Load user
-
+        
     return app
 
 app = create_app()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=443)
+    

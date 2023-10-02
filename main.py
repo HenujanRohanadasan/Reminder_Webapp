@@ -22,7 +22,6 @@ def create_app():
     #create Database
     with app.app_context():
         db.create_all()
-        print('database created')
 
     #Manage Login
 

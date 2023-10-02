@@ -15,16 +15,16 @@ def create_app():
     db.init_app(app)
     
     #Register Blueprints
-
+    import views
+    
+    app.register_blueprint(views.views, url_prefix='/')
+    
     #create Database
     with app.app_context():
         db.create_all()
         print('database created')
 
     #Manage Login
-    login_manager = LoginManager()
-    login_manager.login_view = ''
-    login_manager.init_app(app)
 
     #Load user
 

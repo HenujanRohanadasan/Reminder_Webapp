@@ -1,3 +1,7 @@
-http://43.205.26.15 {
+www.demon.abc92.ru {
+    redir https://demon.abc92.ru{uri}
+}
+
+demon.abc92.ru {
     reverse_proxy localhost:8000
 }

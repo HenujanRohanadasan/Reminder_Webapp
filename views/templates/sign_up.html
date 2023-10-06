@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<br>
+<form method="post">
+    <h3 align="center">Sign-Up</h3>
+    <div class="container">
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" id="email" placeholder="enter email">
+        </div>
+        <br>
+        <div class="form-group">
+            <label for="Name" class="form-label">User Name</label>
+            <input type="text" class="form-control" name="user_name" id="Name" placeholder="enter user name">
+        </div>
+        <br>
+        <div class="form-group">
+            <div class="row g-5 align-items-center">
+                <div class="col-auto">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <label for="Password" class="col-form-label">Password</label>
+                          </div>
+                          <div class="col-auto">
+                            <input type="password" id="Password" class="form-control" aria-describedby="passwordHelpInline" name="password" placeholder="enter password">
+                          </div>
+                          <div class="col-auto">
+                            <span id="passwordHelpInline" class="form-text">
+                              Must be 8-20 characters long.
+                            </span>
+                          </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <label for="Password_Confirm" class="col-form-label">Confirm Password</label>
+                          </div>
+                        <div class="col-auto">
+                            <input type="password" id="Password_Confirm" class="form-control" aria-describedby="passwordHelpInline" name="password_confirm" placeholder="confirm password">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div>
+            <button class="btn btn-primary" type="submit" aria-pressed="true">Sign-Up</button>
+            <a href="/login" class="btn btn-secondary" role="button" aria-pressed="true">Login</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

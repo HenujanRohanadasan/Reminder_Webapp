@@ -17,13 +17,24 @@ def create_app():
     #Register Blueprints
     from .views import views
     from .auth import auth
+    from .features import features
     
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
+    app.register_blueprint(features, url_prefix='/')
     
     #create Database
-    from .models import User
+    from .models import User, Subscription
     with app.app_context():
         db.create_all()
+        
+    #Login Manager
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
         
     return app

@@ -1,9 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
+{% block head_element %}{% endblock %}
 {% block content %}
 <br>
 <div class="container">
-    <h1>Hello World!!</h1>
-    <a href="/notify" class="btn btn-primary" type="button">notify</a>
+    <div class="container">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <div class="ct-chart" id="chart1"></div>
+            </div>
+            <div class="col-auto">
+                <div class="ct-chart" id="chart2"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        class MyCharts{
+            constructor(XData, YData, XDimension, YDimension){
+                this.XData = XData;
+                this.YData = YData;
+                this.XDimension = XDimension;
+                this.YDimension = YDimension;
+            }
+
+            createGraph(){
+                var data = {
+                    labels: this.XData,
+                    series: [this.YData]
+                }
+                var options = {
+                    width: this.XDimension,
+                    height: this.YDimension,
+                    axisX: {
+                        showGrid: true,
+                        showLabel: false
+                    },
+                    axisY: {
+                        offset: 60
+                    }
+                }
+
+                new Chartist.Line('#chart1.ct-chart', data, options);
+                new Chartist.Line('#chart2.ct-chart', data, options);
+            }
+        }
+
+        var XData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        var YData = [5, 2, 4, 2, 1];
+        var XDimension = 610;
+        var YDimension = 500;
+
+        var data = $.get('/chart');
+        var temp = data.done(function(resp){
+            var obj = new MyCharts(XData, resp.temperature, XDimension, YDimension);
+            obj.createGraph();
+        })
+    </script>
 </div>
 {% endblock %}

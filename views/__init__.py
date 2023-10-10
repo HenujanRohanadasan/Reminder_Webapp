@@ -18,10 +18,12 @@ def create_app():
     from .views import views
     from .auth import auth
     from .features import features
+    from .charts import charts
     
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(features, url_prefix='/')
+    app.register_blueprint(charts, url_prefix='/')
     
     #create Database
     from .models import User, Subscription

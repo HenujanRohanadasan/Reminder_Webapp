@@ -24,7 +24,6 @@ def home():
 @features.route("/api/push-subscriptions", methods=["POST"])
 @login_required
 def create_push_subscription():
-    print("called")
     json_data = request.get_json()
     subscription = Subscription.query.filter_by(
         user_id=current_user.id

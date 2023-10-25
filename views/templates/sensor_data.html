@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Sensor Data{% endblock %}
+{% block head_element %}{% endblock %}
+{% block content %}
+<br>
+<div class="container">
+    {% if live %}
+    <ul class="nav nav-tabs justify-content-center">
+        <li class="nav-item">
+          <a class="nav-link {% if active == 'temperature' %}active{% endif %}" href="/sensor_data/live/temperature">Active</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if active == 'humidity' %}active{% endif %}" href="/sensor_data/live/humidity">Link</a>
+        </li>
+    </ul>
+    {% else %}
+    <ul class="nav nav-tabs justify-content-center">
+        <li class="nav-item">
+          <a class="nav-link {% if active == 'temperature' %}active{% endif %}" href="/sensor_data/temperature">Active</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if active == 'humidity' %}active{% endif %}" href="/sensor_data/humidity">Link</a>
+        </li>
+    </ul>
+    {% endif %}
+    <br>
+    <div class="chart-container" style="position: relative; height:80vh; width:65vw">
+        <div class="ct-chart" id="chart1" style="height:80vh; width:65vw"></div>
+    </div>
+    <script>
+        class MyCharts{
+            constructor(series, labels, XDimension, YDimension){
+                this.XData = series;
+                this.YData = labels;
+                this.XDimension = XDimension;
+                this.YDimension = YDimension;
+            }
+
+            createGraph(){
+                var data = {
+                    labels: this.XData,
+                    series: [this.YData]
+                }
+                var options = {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 6|9,
+                    axisX: {
+                        showGrid: true,
+                        showLabel: true
+                    },
+                    axisY: {
+                        offset: 60
+                    }
+                }
+
+                {% if chart_type == 'bar' %}
+                new Chartist.Bar('#chart1.ct-chart', data, options);
+                {% elif chart_type == 'line' %}
+                new Chartist.Line('#chart1.ct-chart', data, options);
+                {% endif %}
+            }
+        }
+
+        var XDimension = 1300;
+        var YDimension = 620;
+        var labels = [];
+        var series = [];
+
+        requestData();
+
+        function requestData(){
+            var data = $.get('{{ href }}');
+            {% if live %}
+            live_request(data);
+            {% else %}
+            request(data);
+            {% endif %}
+        }
+
+        function live_request(data){
+            var tm = data.done(function(resp){
+                console.log(resp);
+                console.log(resp.data);
+                console.log(resp.time);
+                if(labels.length < 10 && series.length < 10){
+                    labels.push(resp.data);
+                    series.push(resp.time);
+                }
+                else{
+                    labels.shift();
+                    series.shift();
+                    labels.push(resp.data);
+                    series.push(resp.time);
+                    
+                }
+                var obj = new MyCharts(series, labels, XDimension, YDimension);
+                obj.createGraph();
+                console.log(labels);
+                console.log(series);
+            });
+
+            setTimeout(requestData, 2000);
+        }
+
+        function request(data){
+            var tm = data.done(function(resp){
+                console.log(resp);
+                console.log(resp.data);
+                console.log(resp.time);
+                var obj = new MyCharts(resp.time, resp.data, XDimension, YDimension);
+                obj.createGraph();
+            });
+        }
+
+    </script>
+</div>
+{% endblock %}

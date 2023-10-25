@@ -6,11 +6,7 @@ from influxdb import InfluxDBClient
 DB_NAME = 'database.db'
 db = SQLAlchemy()
 idb_client = InfluxDBClient(host='0.0.0.0', port=8086)
-
-print(idb_client.get_list_database())
-if not idb_client.get_list_database():
-    idb_client.create_database('ts_database')
-
+idb_client.create_database('ts_database')
 idb_client.switch_database('ts_database')
 
 

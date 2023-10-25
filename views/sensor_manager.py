@@ -26,6 +26,7 @@ def temp_add_db(start_timer):
     if start_timer:
         th.Timer(60, temp_add_db, args=[False]).start()
     
+    print("working")
     data, current_time = get_temp()
     
     data_point = [{

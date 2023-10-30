@@ -1,6 +1,7 @@
 from flask import Blueprint
 from flask_login import login_required
 from . import idb_client 
+from collections import deque
 import json, random
 import time as Time
 import threading as th
@@ -24,9 +25,8 @@ def get_temp():
 
 def temp_add_db(start_timer):
     if start_timer:
-        th.Timer(60, temp_add_db, args=[False]).start()
+        th.Timer(60, temp_add_db, args=[True]).start()
     
-    print("working")
     data, current_time = get_temp()
     
     data_point = [{
@@ -56,25 +56,26 @@ def get_live_temp():
 
 
 #read
-def read_temp():    
+def read_temp(no_of_data):    
     idb_client.switch_database('ts_database')
 
-    result = idb_client.query('SELECT "value" FROM "ts_database"."autogen"."temperature" WHERE time > now() - 4d GROUP BY "location"')
+    result = idb_client.query('SELECT "value" FROM "ts_database"."autogen"."temperature" WHERE time > now() - 4d AND "value" =~ /\d+/ GROUP BY "location"')
     points = result.get_points(tags={"location": "farm"})
-
+    
     chart_data = {
         "data": [],
         "time": []
     }
     
+    recent_points = deque(maxlen=int(no_of_data))
+    
     for point in points:
-        cart_data_len = len(chart_data["data"])
-        if cart_data_len < 20:
-            chart_data["data"].append(point["value"])
-            chart_data["time"].append(point["time"])
-        else:
-            break
-        
+        recent_points.append(point)
+
+    for point in recent_points:
+        chart_data["data"].append(point["value"])
+        chart_data["time"].append(point["time"])
+
     return chart_data
 #temp related
 
@@ -102,11 +103,11 @@ def chart_temp_live():
 def chart_hum_live():
     return hum_add()
 
-@sensor_manager.route('/charts/temp', methods=['GET'])
-def chart_temp():
-    return read_temp()
+@sensor_manager.route('/charts/temp/<no_of_data>', methods=['GET'])
+def chart_temp(no_of_data):
+    return read_temp(no_of_data)
 
 
-@sensor_manager.route('/charts/hum', methods=['GET'])
-def chart_hum():
-    return read_temp()
+@sensor_manager.route('/charts/hum/<no_of_data>', methods=['GET'])
+def chart_hum(no_of_data):
+    return read_temp(no_of_data)

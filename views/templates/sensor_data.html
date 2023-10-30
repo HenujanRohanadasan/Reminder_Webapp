@@ -98,11 +98,13 @@
                 var tm = data.done(function(resp){
                     for (const time in resp.time) {
                         if (resp.time.hasOwnProperty(time)) {
+                            labels.shift()
                             labels.push(resp.time[time]);
                         }
                     }
                     for (const data in resp.data) {
                         if (resp.data.hasOwnProperty(data)) {
+                            series.shift()
                             series.push(resp.data[data]);
                         }
                     }

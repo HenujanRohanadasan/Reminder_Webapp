@@ -1,13 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager
-from influxdb import InfluxDBClient
 
 DB_NAME = 'database.db'
 db = SQLAlchemy()
-idb_client = InfluxDBClient(host='0.0.0.0', port=8086)
-idb_client.create_database('ts_database')
-idb_client.switch_database('ts_database')
 
 
 def create_app():
@@ -23,21 +19,16 @@ def create_app():
     from .views import views
     from .auth import auth
     from .features import features
-    from .sensor_manager import sensor_manager
-    from .sensor_views import sensor_views
     
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(features, url_prefix='/')
-    app.register_blueprint(sensor_manager, url_prefix='/')
-    app.register_blueprint(sensor_views, url_prefix='/')
-    
+
     #create Database
-    from .models import User, Subscription, Temp_Data
+    from .models import User, Subscription
     with app.app_context():
         db.create_all()
         from . import sensor_manager
-        sensor_manager.start_all_add()
         
     #Login Manager
     login_manager = LoginManager()

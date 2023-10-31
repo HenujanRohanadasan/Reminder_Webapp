@@ -14,8 +14,3 @@ class Subscription(db.Model):
     subscription_data = db.Column(db.Text, nullable=False, unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
-class Temp_Data(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    temperatures = db.Column(db.JSON, nullable=False)
-    time = db.Column(db.DateTime, default=func.now())
-    

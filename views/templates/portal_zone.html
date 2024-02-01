@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Select Zone{% endblock %}
+{% block head_element %}{% endblock %}
+{% block content %}
+<br>
+<div id="update" class="container">
+    <a type="button" class="btn btn-light" href="/portal"><i class="bi bi-arrow-left-circle"></i> Back</a>
+    <br>
+    <br>
+    <div class="row row-cols-1 row-cols-md-5 g-2">
+    {% for zone in location.zones %}
+    <div class="col">
+      <div class="card" style="width: 14rem; height: 12rem;">
+        <div class="card-body" align="center">
+          <h5 class="card-title">{{ zone.zone_name }}</h5>
+        </div>
+        <div class="card-footer">
+            <a type="button" class="btn btn-primary"  href="/monitor/{{ zone.id }}"">Add</a>
+            <a class="btn btn-secondary" href="/delete/zone/{{ zone.id }}" type="button">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="col">
+        <div class="card text-bg-primary" style="width: 14rem; height: 12rem;">
+            <a type="button" class="card-body btn btn-primary btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#Modal1">
+                <br>
+                <br>
+                <h1>+</h1>
+            </a>
+        </div>
+    </div>
+    </div>
+    <div class="modal fade" id="Modal1" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <form action="/add/zone/{{ location.id }}" method="post">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Zone Name:</label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Enter Zone Name Here">
+              <hr>
+              <h5>Switches</h5>
+              <p>
+                <div class="container">
+                  {% for switch in switches %}
+                  <label class="form-check-label" for="{{ switch.id }}">switch/{{ switch.device_type }}/{{ switch.device.device_location }}/zone{{ switch.device.device_zone }}
+                  <input class="form-check-input" name="Switch {{ switch.id }}" type="checkbox" id="{{ switch.id }}" value="{{ switch.id }}"></label>
+                  <br>
+                  {% endfor %}
+                </div>
+              </p>
+              <hr>
+              <h5>Graphs</h5>
+              <p>
+                <div class="container">
+                  {% for sensor in sensors %}
+                  <label class="form-check-label" for="{{ sensor.id }}">sensor/{{ sensor.device_type }}/{{ sensor.device.device_location }}/zone{{ sensor.device.device_zone }}
+                  <input class="form-check-input" name="Sensor {{ sensor.id }}" type="checkbox" id="{{ sensor.id }}" value="{{ sensor.id }}"></label>
+                  <br>
+                  {% endfor %}
+                </div>
+              </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary"  type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block title %}Monitor{% endblock %}
+{% block content %}
+<br>
+<div class="form-check form-switch" align="left">
+  <br>
+  {% if automation_status == 1 %}
+  <input class="form-check-input mx-2" type="checkbox" role="switch" id="aut_stat" onchange="change_automation_state()" checked>
+  {% else %}
+  <input class="form-check-input mx-2" type="checkbox" role="switch" id="aut_stat" onchange="change_automation_state()">
+  {% endif %}
+  <label class="form-check-label" for="aut_stat">Automate Watering</label>
+</div>
+<div class="container" align="right">
+  <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#Modal1">Add Device</button>
+  <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#Modal2">Feature Added</button>
+</div>
+<div class="modal fade" id="Modal1" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable"">
+    <form method="post">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Add Elements</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <select class="form-select" aria-label="Default select example" id="selected" name="selected">
+            <option selected>Select Element To Add</option>
+            {% for switch in switches %}
+            <option value="Switch {{ switch.id }}">Switch/{{ switch.device_type }}/{{ switch.device.device_location }}/Zone{{ switch.device.device_zone }}</option>
+            {% endfor %}
+            {% for sensor in sensors %}
+            <option value="Sensor {{ sensor.id }}">Sensor/{{ sensor.device_type }}/{{ sensor.device.device_location }}/Zone{{ sensor.device.device_zone }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="modal fade" id="Modal2" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable"">
+    <form id="feature_note">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>Feature Added</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <label for="feature">Feature: </label>
+          <input class="form-control" type="text" id="feature" name="feature">
+          <div display="none">
+            <input class="form-control" id="zone_id" name="zone_id" type="hidden" value="{{ zone_id }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="button" onclick="add_feature()" data-bs-dismiss="modal">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<br>
+<div class="container">
+  <div class="row">
+    {% for _id in ids %}
+      {% if _id.device_type == 'Sensor' %}
+      <a type="button" class="btn-close" aria-label="Close" href="/monitor/delete/{{ _id.id }}/{{ _id.zone_id }}"></a>
+      <div class="col-12">
+        <div class="chart" id="bargraph{{ _id.switch_sensor_id }}">
+          <script>
+              create_chart({{ _id.switch_sensor_id }});
+
+              function create_chart(sensorId){
+                $.ajax({
+                  url: "/chart", 
+                  type: "GET",
+                  contentType: 'application/json;charset=UTF-8',
+                  data: {
+                    "sensor_id": sensorId,
+                    "chart_type": "Line"
+                  },
+                  dataType: "json",
+                  success: function(data){
+                    Plotly.newPlot('bargraph{{ _id.switch_sensor_id }}', data, {});
+                    var chartPlot = document.getElementById('bargraph{{ _id.switch_sensor_id }}'), data;
+                    chartPlot.on('plotly_click', function(data){
+                      click_event(data);
+                    });
+                  }
+                });
+              }
+
+              function click_event(data){
+                for(var i=0; i < data.points.length; i++){
+                  $.ajax({
+                    url: '/features/notes/nearest',
+                    type: 'GET',
+                    data: {
+                      "time_selected": data.points[i].x,
+                      "zone_id": {{ zone_id }}
+                    },
+                    success: function(html){
+                      document.getElementById('toast').innerHTML = html;
+                      var myToast = new bootstrap.Toast(document.getElementById('liveToast'));
+                      myToast.show();
+                    }
+                  });
+                }
+              }
+          </script>
+        </div>
+      </div>
+      <br>
+      {% endif %}
+    {% endfor %}
+    {% for _id in ids %}
+      {% if _id.device_type == 'Switch' %}
+      <div class="col-auto">
+        <div class="form-check form-switch">
+          {% for switch in switches %}
+            {% if switch.id == _id.switch_sensor_id %}
+            <div align="center">
+              <label class="form-check-label" for="flexSwitchCheckDefault" id="switch_label">switch/{{ switch.device_type }}/{{ switch.device.device_location }}/zone{{ switch.device.device_zone }}</label>
+            </div>
+            <br>
+              {% if switch.status == '1' and switch.device.status == '1' %}
+              <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" checked>
+              {% elif switch.status == '0' and switch.device.status == '1' %}
+              <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);">
+              {% elif switch.status == '0' and switch.device.status == '0' %}
+              <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" disabled>
+              {% else %}
+              <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" disabled>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <script>
+        function change_state(switchId){
+          $.ajax({
+            url: "/publish",
+            type: "GET", 
+            contentType: "application/json;charset=UTF-8",
+            data: {
+              "switch_id": switchId
+            }, 
+            dataType: "text",
+            success: function(data){
+              console.log(data);
+            }
+          });
+        }
+      </script>
+      <a type="button" class="btn-close" aria-label="Close" href="/monitor/delete/{{ _id.id }}/{{ _id.zone_id }}"></a>
+      {% endif %}
+    {% endfor %}
+    </div>
+    <br>
+    <br>
+    <div class="container" id="feature_note_container">
+      {% for feature_note in feature_notes %}
+      <h5>{{ feature_note.feature }}<div align="right"><button type="button" class="btn-close" aria-label="Close" onclick="delete_feature({{ feature_note.id }})"></button></div></h5>
+      {{ feature_note.date_time }}
+      <br>
+      <br>
+      {% endfor %}
+    </div>
+    <br>
+    <br>
+    <hr>
+</div>
+<script>
+  function add_feature(){
+    $.ajax({
+      url: '/features/notes/add',
+      type: 'POST',
+      data: $("#feature_note").serialize(),
+      success: function(html){
+        document.getElementById("feature_note_container").innerHTML = html;
+      }
+    });
+  }
+
+  function delete_feature(feature_note_id){
+    $.ajax({
+      url: '/features/notes/delete',
+      type: 'GET',
+      data: {
+        "feature_note_id": feature_note_id,
+        "zone_id": {{ zone_id }}
+      },
+      success: function(html){
+        document.getElementById("feature_note_container").innerHTML = html;
+      }
+    });
+  }
+
+  function change_automation_state(){
+    $.ajax({
+      url: "/change_automation",
+      type: "GET", 
+      contentType: "application/json;charset=UTF-8",
+      data: {
+        "zone_id": {{ zone_id }}
+      },
+      dataType: "text",
+      success: function(data){
+        console.log(data);
+      }
+    });
+  }    
+</script>
+{% endblock %}

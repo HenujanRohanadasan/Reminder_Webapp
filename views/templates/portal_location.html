@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Select Location{% endblock %}
+{% block head_element %}{% endblock %}
+{% block content %}
+<br>
+<br>
+<div id="update" class="container">
+  <div class="row row-cols-1 row-cols-md-5 g-2">
+    {% for location in user.locations %}
+    <div class="col">
+      <div class="card" style="width: 14rem; height: 12rem;">
+        <div class="card-body" align="center">
+          <h5 class="card-title">{{ location.location_name }}</h5>
+        </div>
+        <div class="card-footer">
+            <a type="button" class="btn btn-primary" href="/portal/zones/{{ location.location_name }}">Add</a>
+            <a class="btn btn-secondary" href="/delete/location/{{ location.id }}" type="button">Delete</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <div class="col">
+        <div class="card text-bg-primary" style="width: 14rem; height: 12rem;">
+            <a type="button" class="card-body btn btn-primary btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#Modal1">
+                <br>
+                <br>
+                <h1>+</h1>
+            </a>
+        </div>
+    </div>
+  </div>
+  <div class="modal fade" id="Modal1" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <form action="/add/location" method="POST">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Location Name:</label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Enter Location Name Here">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-primary" type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

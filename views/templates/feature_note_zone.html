@@ -1,0 +1,6 @@
+{% for feature_note in feature_notes %}
+<h5>{{ feature_note.feature }}<div align="right"><button type="button" class="btn-close" aria-label="Close" onclick="delete_feature({{ feature_note.id }})"></button></div></h5>
+{{ feature_note.date_time }}
+<br>
+<br>
+{% endfor %}

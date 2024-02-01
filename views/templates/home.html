@@ -3,5 +3,59 @@
 {% block head_element %}{% endblock %}
 {% block content %}
 <br>
-<h3>Welcome Home!</h3>
+<br>
+<div class="container">
+    <div class="row">
+        {% for sensor in sensors %}
+        <div class="col-12">
+            <div class="chart" id="bargraph{{ sensor }}">
+                <script>
+                    create_chart();
+
+                    function create_chart(){
+                        var sensorType = "{{ sensor }}";
+                        var chartId = 'bargraph' + sensorType;
+                        $.ajax({
+                            url: "/chart/multiple", 
+                            type: "GET",
+                            contentType: 'application/json;charset=UTF-8',
+                            data: {
+                                "chart_type": "Line",
+                                "device_type": sensorType
+                            },
+                            dataType: "json",
+                            success: function(data){
+                                Plotly.newPlot(chartId, data);
+                                var chartPlot = document.getElementById('bargraph{{ sensor }}'), data;
+                                    chartPlot.on('plotly_click', function(data){
+                                    click_event(data);
+                                });
+                            }
+                        });
+                    }
+                    
+                    function click_event(data){
+                        for(var i=0; i < data.points.length; i++){
+                            $.ajax({
+                                url: '/features/notes/multiple/nearest',
+                                type: 'GET',
+                                contentType: 'application/json;charset=UTF-8',
+                                data: {
+                                    "time_selected": data.points[i].x,
+                                    "name": data.points[i].fullData.name
+                                },
+                                success: function(html){
+                                    document.getElementById('toast').innerHTML = html;
+                                    var myToast = new bootstrap.Toast(document.getElementById('liveToast'));
+                                    myToast.show();
+                                }
+                            });
+                        }
+                    }
+                </script>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

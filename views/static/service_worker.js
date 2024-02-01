@@ -32,3 +32,10 @@ self.addEventListener('push', function(event) {
     self.registration.showNotification(title, options)
   );
 });
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/devices') // Replace with the URL you want to redirect to
+  );
+});

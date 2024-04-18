@@ -37,6 +37,8 @@ class Switch(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     device_type = db.Column(db.Text)
     status = db.Column(db.Text, default='0')
+    watering_min_bound = db.Column(db.Integer, default=20)
+    watering_max_bound = db.Column(db.Integer, default=60)
     device_id = db.Column(db.Integer, db.ForeignKey('device.id'))
     
 

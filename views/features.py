@@ -130,6 +130,26 @@ def change_automation_status():
     zone_id = request.args["zone_id"]
     zone = Zone.query.filter_by(id=zone_id).first()
     zone.automation_status = int(not(zone.automation_status))
-    print(f"changing automation status to {zone.automation_status}")
     db.session.commit()
-    return "automation changed"
+    return redirect(f"/monitor/{zone_id}")
+
+@features.route('/change_switch_watering_bounds', methods=['GET'])
+def change_switch_bounds():
+    min_bound = request.args['min_bound']
+    max_bound = request.args['max_bound']
+    switch_id = request.args['switch_id']
+    zone_id = request.args["zone_id"]
+    
+    if not type(int(min_bound)) is int or not type(int(max_bound)) is int:
+        return "error0"
+    elif int(min_bound) > int(max_bound):
+        return "error1"
+    elif int(max_bound) > 100:
+        return "error2"
+    else:
+        switch = Switch.query.filter_by(id=switch_id).first()
+        switch.watering_min_bound = min_bound
+        switch.watering_max_bound = max_bound
+        db.session.commit()
+    
+    return "changed switch watering bound"

@@ -65,6 +65,26 @@
     </form>
   </div>
 </div>
+<div class="modal fade" id="switch_edit_modal" tabindex="-1" aria-labelledby="switch_edit_modal_label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        Edit Switch Behaviour
+      </div>
+      <div class="modal-body">
+        <label class="form-label" for="min-bound">Water At:</label>
+        <input class="form-control" type="text" id="min-bound" placeholder="low bound">
+        <br>
+        <label class="form-label" for="max-bound">Water At:</label>
+        <input class="form-control" type="text" id="max-bound" placeholder="high bound">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" type="button" onclick="edit_switch_bounds()" data-bs-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
 <br>
 <div class="container">
   <div class="row">
@@ -125,19 +145,20 @@
         <div class="form-check form-switch">
           {% for switch in switches %}
             {% if switch.id == _id.switch_sensor_id %}
-            <div align="center">
-              <label class="form-check-label" for="flexSwitchCheckDefault" id="switch_label">switch/{{ switch.device_type }}/{{ switch.device.device_location }}/zone{{ switch.device.device_zone }}</label>
-            </div>
-            <br>
-              {% if switch.status == '1' and switch.device.status == '1' %}
+              <div align="center">
+                <label class="form-check-label" for="flexSwitchCheckDefault" id="switch_label">switch/{{ switch.device_type }}/{{ switch.device.device_location }}/zone{{ switch.device.device_zone }}</label>
+              </div>
+              <br>
+              {% if switch.status == '1' and switch.device.status == '1' and automation_status == 1 %}
               <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" checked>
-              {% elif switch.status == '0' and switch.device.status == '1' %}
+              {% elif switch.status == '0' and switch.device.status == '1' and automation_status == 1 %}
               <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);">
-              {% elif switch.status == '0' and switch.device.status == '0' %}
-              <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" disabled>
-              {% else %}
+              {% elif switch.device.status == '0' or automation_status == 0 %}
               <input class="form-check-input mx-2" type="checkbox" role="switch" id="switch{{ _id.switch_sensor_id }}" onchange="change_state({{ _id.switch_sensor_id }})" style="transform: scale(1.8);" disabled>
               {% endif %}
+              <br>
+              <br>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#switch_edit_modal" onclick="set_current_switch({{ switch.id }})">Edit</button>
             {% endif %}
           {% endfor %}
         </div>
@@ -177,6 +198,17 @@
     <hr>
 </div>
 <script>
+  var current_switch_id;
+  function set_current_switch(switch_id)
+  {
+    current_switch_id = switch_id;
+  }
+
+  function get_current_switch()
+  {
+    return current_switch_id;
+  }
+
   function add_feature(){
     $.ajax({
       url: '/features/notes/add',
@@ -184,6 +216,25 @@
       data: $("#feature_note").serialize(),
       success: function(html){
         document.getElementById("feature_note_container").innerHTML = html;
+      }
+    });
+  }
+
+  function edit_switch_bounds()
+  {
+    $.ajax({
+      url: '/change_switch_watering_bounds',
+      type: 'GET',
+      contentType: "application/json;charset=UTF-8",
+      data: {
+        "switch_id": current_switch_id,
+        "min_bound": document.getElementById("min-bound").value,
+        "max_bound": document.getElementById("max-bound").value,
+        "zone_id": {{ zone_id }}
+      },
+      dataType: "text",
+      success: function(data){
+        console.log(data)
       }
     });
   }
